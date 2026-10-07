@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html><head><meta charset="utf-8"><title>JumpStart</title>
 <style>
   html,body{margin:0;height:100%;background:#14161a;color:#e8e8e8;font:14px "Segoe UI",sans-serif;overflow:hidden}
@@ -66,16 +66,16 @@ document.getElementById('wrap').onclick=e=>{if(['wrap','grid','bar'].includes(e.
 
 const panel=document.getElementById('panel');
 function buildPanel(){
-  const rows=[['steam','Steam games',settings.installed&&settings.installed.steam],['epic','Epic games',settings.installed&&settings.installed.epic],['xbox','Xbox / Game Pass games',settings.installed&&settings.installed.xbox],['systemTools','Show hidden apps by default',true]];
+  const rows=[['steam','Steam games',settings.installed&&settings.installed.steam],['epic','Epic games',settings.installed&&settings.installed.epic],['xbox','Xbox / Game Pass games',settings.installed&&settings.installed.xbox],['systemTools','Show hidden apps by default',true],['autostart','Run JumpStart when I sign in',settings.canAutostart]];
   panel.textContent='';
   rows.forEach(([k,label,ok])=>{
     const l=document.createElement('label');if(!ok)l.className='off';
     const c=document.createElement('input');c.type='checkbox';c.checked=!!settings[k]&&ok;c.disabled=!ok;
-    c.onchange=()=>{settings[k]=c.checked;api.setSettings({[k]:c.checked})};
-    l.append(c,label+(ok||k==='systemTools'?'':' (not found)'));panel.append(l);
+    c.onchange=()=>{settings[k]=c.checked;if(k==='autostart')api.setAutostart(c.checked);else api.setSettings({[k]:c.checked})};
+    l.append(c,label+(ok||k==='systemTools'?'':(k==='autostart'?' (installed version only)':' (not found)')));panel.append(l);
   });
 }
-document.getElementById('sets').onclick=e=>{e.stopPropagation();const open=panel.style.display==='block';if(!open)buildPanel();panel.style.display=open?'none':'block';q.focus()};
+document.getElementById('sets').onclick=async e=>{e.stopPropagation();const open=panel.style.display==='block';if(!open){settings=await api.getSettings();buildPanel()}panel.style.display=open?'none':'block';q.focus()};
 panel.onclick=e=>e.stopPropagation();
 document.addEventListener('click',()=>{panel.style.display='none'});
 api.getSettings().then(s=>{settings=s;showSys=!!s.systemTools;render()});

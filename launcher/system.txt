@@ -1,4 +1,4 @@
-﻿# What counts as a "system tool" (hidden until you press the toggle).
+# What counts as a "system tool" (hidden until you press the toggle).
 # Also hidden automatically: anything whose shortcut points into C:\Windows, or to a .msc / .cpl file.
 # folder: = a Start Menu folder name (any depth). name: = the exact app name.
 folder: Administrative Tools

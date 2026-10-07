@@ -1,4 +1,4 @@
-﻿const { app, BrowserWindow, ipcMain, shell, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, nativeImage } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -22,6 +22,7 @@ if (app.isPackaged) {
 
 // ---- Windows-key helper (AutoHotkey, compiled): started and stopped by this app ----
 const { spawn } = require('child_process');
+const autostart_ = require('./autostart');
 let helper = null, keysPaused = false;
 function helperExe() { return app.isPackaged ? path.join(resDir, 'JumpStartKeys.exe') : ''; }
 function startHelper() {
@@ -145,6 +146,7 @@ const storeCacheFile = path.join(dataDir, 'store-cache.json');
 let storeCache = [];
 try { storeCache = JSON.parse(fs.readFileSync(storeCacheFile, 'utf8')); } catch {}
 let storeRefreshing = false;
+function logLine(s) { try { fs.appendFileSync(path.join(dataDir, 'jumpstart.log'), new Date().toISOString() + ' ' + s + '\n'); } catch {} }
 function refreshStoreApps() {
   if (storeRefreshing) return;
   storeRefreshing = true;
@@ -155,12 +157,18 @@ function refreshStoreApps() {
       try {
         let list = JSON.parse(stdout);
         if (!Array.isArray(list)) list = [list];
+        const oldGames = storeCache.filter(s => s.game).length, newGames = list.filter(s => s.game).length;
+        if (storeCache.length && (list.length < storeCache.length * 0.6 || newGames < oldGames)) {
+          logLine('store list looked incomplete (' + list.length + ' apps, ' + newGames + ' games; had ' + storeCache.length + ', ' + oldGames + '): keeping old list, retrying in 8s');
+          setTimeout(refreshStoreApps, 8000);
+          return;
+        }
         if (JSON.stringify(list) !== JSON.stringify(storeCache)) {
           storeCache = list;
           fs.writeFileSync(storeCacheFile, JSON.stringify(list));
           scan();
         }
-      } catch {}
+      } catch (e) { logLine('store list failed: ' + (err ? err.message : e)); }
     });
 }
 function storeItems(taken, rules, settings) {
@@ -269,7 +277,15 @@ function isSystem(lnk, name, rules, target) {
   if (t.endsWith('.msc') || t.endsWith('.cpl')) return true;
   return false;
 }
+let scanning = false, rescanQueued = false;
 async function scan() {
+  if (scanning) { rescanQueued = true; return; }
+  scanning = true;
+  try { await scanOnce(); } catch (e) { logLine('scan failed: ' + e); }
+  scanning = false;
+  if (rescanQueued) { rescanQueued = false; scan(); }
+}
+async function scanOnce() {
   const ignore = loadIgnore();
   const links = [];
   folders.forEach(f => findLinks(f, links));
@@ -357,7 +373,8 @@ ipcMain.on('launch', (_e, id) => {
   else if (a.appId) require('child_process').spawn('explorer.exe', ['shell:AppsFolder\\' + a.appId], { detached: true, stdio: 'ignore' }).unref();
   else shell.openPath(a.lnk);
 });
-ipcMain.handle('get-settings', () => ({ ...loadSettings(), installed: { steam: !!steamPath(), epic: fs.existsSync(path.join(process.env.ProgramData || '', 'Epic/EpicGamesLauncher/Data/Manifests')), xbox: storeCache.some(s => s.game) } }));
+ipcMain.handle('get-settings', async () => ({ ...loadSettings(), autostart: app.isPackaged ? await autostart_.isOn() : false, canAutostart: app.isPackaged, installed: { steam: !!steamPath(), epic: fs.existsSync(path.join(process.env.ProgramData || '', 'Epic/EpicGamesLauncher/Data/Manifests')), xbox: storeCache.some(s => s.game) } }));
+ipcMain.on('set-autostart', (_e, on) => { if (app.isPackaged) autostart_.set(!!on, process.execPath); });
 ipcMain.on('set-settings', (_e, s) => {
   try { fs.writeFileSync(settingsFile, JSON.stringify({ ...loadSettings(), ...s }, null, 2)); } catch {}
   scan();

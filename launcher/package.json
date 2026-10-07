@@ -19,7 +19,7 @@
     "productName": "JumpStart",
     "directories": { "output": "../dist" },
     "publish": [{ "provider": "github", "owner": "swamp2k", "repo": "jumpstart" }],
-    "files": ["main.js", "preload.js", "index.html", "package.json"],
+    "files": ["main.js", "preload.js", "autostart.js", "index.html", "package.json"],
     "extraResources": [
       { "from": "list-store-apps.ps1", "to": "list-store-apps.ps1" },
       { "from": "extract-icons.ps1", "to": "extract-icons.ps1" },
@@ -30,7 +30,12 @@
     ],
     "win": { "target": "nsis", "signAndEditExecutable": false },
     "nsis": {
-      "oneClick": true,
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": true,
+      "shortcutName": "JumpStart",
+      "installerLanguages": ["en_US"],
       "perMachine": false,
       "allowElevation": false,
       "runAfterFinish": true,
@@ -40,3 +45,4 @@
     }
   }
 }
+
