@@ -18,6 +18,7 @@
     "appId": "com.jumpstart.app",
     "productName": "JumpStart",
     "directories": { "output": "../dist" },
+    "publish": [{ "provider": "github", "owner": "swamp2k", "repo": "jumpstart" }],
     "files": ["main.js", "preload.js", "index.html", "package.json"],
     "extraResources": [
       { "from": "list-store-apps.ps1", "to": "list-store-apps.ps1" },
