@@ -44,7 +44,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: |
           npm ci
-          npx electron-builder --win nsis "-c.extraMetadata.version=$env:VERSION"
+          npx electron-builder --win nsis --publish never "-c.extraMetadata.version=$env:VERSION"
           Get-ChildItem ..\dist\*.exe
 
       - name: Publish release
