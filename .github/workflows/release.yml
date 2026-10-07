@@ -1,0 +1,53 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: 0.1.${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Get AutoHotkey v2 and Ahk2Exe
+        shell: pwsh
+        run: |
+          gh release download --repo AutoHotkey/AutoHotkey --pattern 'AutoHotkey_*.zip' --dir ahk
+          gh release download --repo AutoHotkey/Ahk2Exe --pattern 'Ahk2Exe*.zip' --dir ahk
+          Get-ChildItem ahk\*.zip | ForEach-Object { Expand-Archive $_ -DestinationPath ahk\x -Force }
+          Get-ChildItem ahk\x -Recurse -Filter *.exe | Select-Object -ExpandProperty FullName
+
+      - name: Compile the Windows-key helper
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force launcher\helper | Out-Null
+          $ahk2exe = (Get-ChildItem ahk\x -Recurse -Filter Ahk2Exe.exe | Select-Object -First 1).FullName
+          $base = (Get-ChildItem ahk\x -Recurse -Filter AutoHotkey64.exe | Select-Object -First 1).FullName
+          & $ahk2exe /in winkey-helper\winkey.ahk /out launcher\helper\JumpStartKeys.exe /base $base | Out-Host
+          if (-not (Test-Path launcher\helper\JumpStartKeys.exe)) { throw 'JumpStartKeys.exe was not built' }
+
+      - name: Build the installer
+        shell: pwsh
+        working-directory: launcher
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          npm ci
+          npx electron-builder --win nsis "-c.extraMetadata.version=$env:VERSION"
+          Get-ChildItem ..\dist\*.exe
+
+      - name: Publish release
+        shell: pwsh
+        run: |
+          gh release create "v$env:VERSION" dist\JumpStart-Setup.exe --title "JumpStart $env:VERSION" --generate-notes

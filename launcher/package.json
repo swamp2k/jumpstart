@@ -1,0 +1,41 @@
+{
+  "name": "start-launcher",
+  "productName": "JumpStart",
+  "version": "0.1.0",
+  "description": "Fullscreen Start launcher",
+  "author": "Martin",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.jumpstart.app",
+    "productName": "JumpStart",
+    "directories": { "output": "../dist" },
+    "files": ["main.js", "preload.js", "index.html", "package.json"],
+    "extraResources": [
+      { "from": "list-store-apps.ps1", "to": "list-store-apps.ps1" },
+      { "from": "extract-icons.ps1", "to": "extract-icons.ps1" },
+      { "from": "system.txt", "to": "system.txt" },
+      { "from": "ignore.txt", "to": "ignore.txt" },
+      { "from": "tray.png", "to": "tray.png" },
+      { "from": "helper/JumpStartKeys.exe", "to": "JumpStartKeys.exe" }
+    ],
+    "win": { "target": "nsis", "signAndEditExecutable": false },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": false,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true,
+      "artifactName": "JumpStart-Setup.exe",
+      "include": "installer.nsh"
+    }
+  }
+}

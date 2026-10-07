@@ -1,0 +1,37 @@
+﻿# What counts as a "system tool" (hidden until you press the toggle).
+# Also hidden automatically: anything whose shortcut points into C:\Windows, or to a .msc / .cpl file.
+# folder: = a Start Menu folder name (any depth). name: = the exact app name.
+folder: Administrative Tools
+folder: Windows Administrative Tools
+folder: Windows Tools
+folder: Windows System
+folder: Windows Accessories
+folder: Accessories
+folder: Accessibility
+folder: Windows Ease of Access
+folder: System Tools
+folder: Windows PowerShell
+folder: Maintenance
+folder: Visual Studio Tools
+folder: Startup
+name: Run
+name: services
+name: Python 3.14 Manuals (64-bit)
+name: Python 3.14 Module Docs (64-bit)
+name: Windows Media Player Legacy
+name: Hyper-V Manager
+name: Windows Defender Firewall with Advanced Security
+
+
+# show: = everyday Windows apps that always stay visible (exact name).
+# Right-click choices are kept in user-overrides.json (delete that file to reset them).
+show: Notepad
+show: Snipping Tool
+show: Paint
+show: Calculator
+show: WordPad
+show: Terminal
+show: Windows Terminal
+show: Task Manager
+show: File Explorer
+show: Command Prompt

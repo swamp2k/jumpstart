@@ -1,0 +1,19 @@
+# dependencies and build output
+node_modules/
+dist/
+launcher/helper/
+*.exe
+*.blockmap
+
+# per-user data created while running (never commit)
+settings.json
+user-overrides.json
+store-cache.json
+last-scan.txt
+last-toggle.txt
+icon-debug.txt
+
+# screenshots and temp files
+*.png
+!launcher/tray.png
+*.log

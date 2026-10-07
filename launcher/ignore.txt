@@ -1,0 +1,16 @@
+# One word/phrase per line. Any app whose name contains it (any case) is hidden.
+uninstall
+readme
+read me
+website
+help
+manual
+license
+release notes
+documentation
+eula
+release notes
+releasenotes
+settings
+wsl
+troubleshoot
