@@ -3,6 +3,8 @@ name: Build and release
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
 
 permissions:
   contents: write
